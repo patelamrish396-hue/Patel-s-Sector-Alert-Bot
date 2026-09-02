@@ -1,0 +1,38 @@
+name: Sector News Alert
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # needed to save seen_articles.json back to the repo
+
+jobs:
+  check-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run bot
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python sector_news_bot.py
+
+      - name: Save seen-articles state back to repo
+        run: |
+          git config user.name "sector-news-bot"
+          git config user.email "actions@github.com"
+          git add seen_articles.json
+          git diff --quiet --cached || git commit -m "Update seen articles [skip ci]"
+          git push

@@ -2,7 +2,9 @@ name: Sector News Alert
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # every 15 minutes
+    # Runs every 5 min, offset to :02/:07/:12... instead of :00/:05/:10...
+    # to avoid GitHub's peak-load scheduling slots.
+    - cron: "2-59/5 * * * *"
   workflow_dispatch: {}
 
 permissions:
